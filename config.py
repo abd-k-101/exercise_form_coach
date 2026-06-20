@@ -8,7 +8,7 @@ POSE_NUM_POSES = 1
 SMOOTHING_ALPHA = 0.35
 
 # Visibility / presence
-MIN_VISIBILITY = 0.5
+MIN_VISIBILITY = 0.75
 
 # Squat thresholds
 STANDING_KNEE_ANGLE = 160
@@ -17,5 +17,8 @@ SHALLOW_KNEE_ANGLE = 110
 
 # UI
 FONT = 0
-FONT_SCALE = 0.7
+FONT_SCALE = 1.2             # primary HUD text — phase, rep count, score
+FONT_SCALE_SECONDARY = 0.85  # secondary HUD text — angles, feedback, bias
 THICKNESS = 2
+HUD_ALPHA = 0.65             # background rect opacity (0 = transparent, 1 = opaque)
+HUD_PADDING = 12             # pixels between text and rect edges

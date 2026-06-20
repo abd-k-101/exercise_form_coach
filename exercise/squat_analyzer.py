@@ -44,6 +44,8 @@ class SquatAnalyzer:
         self.current_rep_max_torso_angle = None
         self.current_rep_max_shin_angle = None
         self.current_rep_distance_status = "Unknown"
+        self.current_rep_max_hip_y = None
+        self.current_rep_knee_y_at_depth = None
 
         self.last_rep_feedback = None
 
@@ -108,11 +110,15 @@ class SquatAnalyzer:
             torso_angle=torso_angle,
             shin_angle=shin_angle,
             distance_status=distance_status.message,
+            hip_y=hip_xy[1],
+            knee_y=knee_xy[1],
         )
 
         rep_event = None
         if rep_just_completed:
-            rep_event = self._finalize_rep_feedback()
+            rep_event = self._finalize_rep_feedback(
+                self.current_rep_max_hip_y, self.current_rep_knee_y_at_depth
+            )
 
         result.phase = phase
         result.rep_count = self.rep_count
@@ -159,7 +165,7 @@ class SquatAnalyzer:
         self.phase = phase
         return phase, rep_just_completed
 
-    def _update_rep_tracking(self, phase, knee_angle, torso_angle, shin_angle, distance_status):
+    def _update_rep_tracking(self, phase, knee_angle, torso_angle, shin_angle, distance_status, hip_y, knee_y):
         if phase in ["DESCENDING", "BOTTOM", "ASCENDING"]:
             if not self.rep_active:
                 self.rep_active = True
@@ -167,13 +173,18 @@ class SquatAnalyzer:
                 self.current_rep_max_torso_angle = torso_angle
                 self.current_rep_max_shin_angle = shin_angle
                 self.current_rep_distance_status = distance_status
+                self.current_rep_max_hip_y = hip_y
+                self.current_rep_knee_y_at_depth = knee_y
             else:
                 self.current_rep_min_knee_angle = min(self.current_rep_min_knee_angle, knee_angle)
                 self.current_rep_max_torso_angle = max(self.current_rep_max_torso_angle, torso_angle)
                 self.current_rep_max_shin_angle = max(self.current_rep_max_shin_angle, shin_angle)
                 self.current_rep_distance_status = distance_status
+                if hip_y > self.current_rep_max_hip_y:
+                    self.current_rep_max_hip_y = hip_y
+                    self.current_rep_knee_y_at_depth = knee_y
 
-    def _finalize_rep_feedback(self):
+    def _finalize_rep_feedback(self, hip_y, knee_y):
         if not self.rep_active:
             return None
 
@@ -184,16 +195,18 @@ class SquatAnalyzer:
 
         feedback = []
 
-        if min_knee > self.shallow_knee_angle:
+        if hip_y is None or hip_y < knee_y - 0.05:
+            feedback.append("Squat deeper! Get your hips parallel to your knees.")
+        elif min_knee > self.shallow_knee_angle:
             feedback.append("Go a little deeper on the next rep.")
 
         if max_torso < 12:
             feedback.append("Sit your hips back more to improve hip hinge.")
 
-        if max_shin > 30:
+        if max_shin > 40:
             feedback.append("Your knees are traveling too far forward.")
 
-        if max_torso > 40:
+        if max_torso > 55:
             feedback.append("Keep your chest from collapsing too much.")
 
         if not feedback:
@@ -232,6 +245,8 @@ class SquatAnalyzer:
         self.current_rep_max_torso_angle = None
         self.current_rep_max_shin_angle = None
         self.current_rep_distance_status = "Unknown"
+        self.current_rep_max_hip_y = None
+        self.current_rep_knee_y_at_depth = None
 
         return rep_event
 
@@ -246,14 +261,14 @@ class SquatAnalyzer:
         score = 100
         for item in feedback:
             lower = item.lower()
-            if "deeper" in lower:
-                score -= 20
+            if "deeper" in lower or "hips parallel" in lower:
+                score -= 35
             elif "hips back" in lower:
-                score -= 15
+                score -= 20
             elif "knees are traveling too far forward" in lower:
-                score -= 15
+                score -= 25
             elif "chest" in lower:
-                score -= 15
+                score -= 20
         return max(0, score)
 
     def _generate_live_feedback(self, phase):

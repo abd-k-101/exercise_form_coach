@@ -3,3 +3,6 @@ ex_env/
 *.pyc
 logs/
 .vscode/
+
+demo_videos/
+assets/sounds/
