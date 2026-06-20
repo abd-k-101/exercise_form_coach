@@ -1,7 +1,6 @@
-Here is the fully updated, highly professional `README.md` reflecting all the new enterprise-grade features (TTS audio, video exporting, testing, and UI scaling).
-
-```md
 # 🏋️‍♂️ Exercise Form Coach: AI-Powered Squat Analyzer
+
+![Demo](assets/demo.gif)
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green)
@@ -133,7 +132,3 @@ pytest tests/ -v
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome! To add a new exercise (e.g., Deadlift, Bench Press), simply create a new analyzer class in the `exercise/` directory following the modular blueprint of `squat_analyzer.py`.
-
-```
-
-```
